@@ -1,5 +1,6 @@
-# Ignorar dependencias
-/node_modules
-
-# Ignorar variables de entorno
 .env
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+
