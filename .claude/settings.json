@@ -1,0 +1,5 @@
+{
+  "enabledPlugins": {
+    "static-analysis@trailofbits": true
+  }
+}
