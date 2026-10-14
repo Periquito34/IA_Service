@@ -18,6 +18,16 @@ def _to_int(value: str | None, default: int) -> int:
         return default
 
 
+DEFAULT_ALLOWED_ORIGINS = (
+    "https://app-emprendedores-movil2.vercel.app",
+    "http://localhost:8100",
+    "http://127.0.0.1:8100",
+    "capacitor://localhost",
+    "https://localhost",
+    "http://localhost",
+)
+
+
 @dataclass(frozen=True)
 class Settings:
     ollama_api_key: str | None
@@ -29,13 +39,15 @@ class Settings:
     host: str
     port: int
     allowed_origins: list[str]
+    firebase_project_id: str | None
 
 
 def get_settings() -> Settings:
     # Backward-compatible fallback:
     # si alguien puso la key de Ollama por error en GOOGLE_API_KEY, igual funciona.
     api_key = os.getenv("OLLAMA_API_KEY") or os.getenv("GOOGLE_API_KEY")
-    origins_csv = os.getenv("ALLOWED_ORIGINS", "*")
+    # Web publicada, desarrollo local y app Android (Capacitor). Se sobrescribe con ALLOWED_ORIGINS.
+    origins_csv = os.getenv("ALLOWED_ORIGINS", ",".join(DEFAULT_ALLOWED_ORIGINS))
     origins = [item.strip() for item in origins_csv.split(",") if item.strip()]
 
     return Settings(
@@ -47,5 +59,6 @@ def get_settings() -> Settings:
         agent_max_tool_rounds=_to_int(os.getenv("AGENT_MAX_TOOL_ROUNDS"), 6),
         host=os.getenv("HOST", "0.0.0.0"),
         port=_to_int(os.getenv("PORT"), 8080),
-        allowed_origins=origins or ["*"],
+        allowed_origins=origins or list(DEFAULT_ALLOWED_ORIGINS),
+        firebase_project_id=os.getenv("FIREBASE_PROJECT_ID"),
     )
