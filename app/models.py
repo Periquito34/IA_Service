@@ -17,3 +17,6 @@ class ChatRequest(BaseModel):
     forceClassicChat: bool = False
     backendAuthToken: str | None = None
 
+
+class RecommendationsRequest(BaseModel):
+    idNegocio: str

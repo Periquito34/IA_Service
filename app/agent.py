@@ -13,6 +13,9 @@ from app.tools import TOOL_DECLARATIONS, execute_tool_call
 BASE_SYSTEM_PROMPT = """Eres un asesor financiero para emprendedores en una app de gestion de negocios.
 Tu trabajo es convertir datos del negocio en analisis claro, practico y accionable.
 
+Formato de montos: la moneda es el peso colombiano (COP). Escribe los montos con el signo $ y punto
+como separador de miles, sin decimales (por ejemplo $1.234.567). Nunca uses ¢ ni otras monedas.
+
 Contexto del dominio:
 - El usuario puede registrar productos (precioVenta, costoProduccion, stock), ventas, transacciones, gastos fijos y rentabilidad.
 - Formulas clave:
@@ -27,8 +30,7 @@ Reglas de operacion con tools:
 3) Si una tool devuelve 404 en listados, interpretalo como "sin datos" (no como falla fatal).
 4) Si no hay idNegocio, intenta resolverlo con uid (negocios del usuario). Si aun falta contexto, pide solo lo minimo necesario.
 5) Usa la menor cantidad de tools posible, pero suficientes para sostener la conclusion.
-6) Si hay recomendaciones claras y existe idNegocio, guarda una recomendacion con la tool correspondiente.
-7) Si una tool devuelve error o falta contexto, no concluyas que "no hay datos"; explica la limitacion y pide solo el dato faltante.
+6) Si una tool devuelve error o falta contexto, no concluyas que "no hay datos"; explica la limitacion y pide solo el dato faltante.
 
 Estrategia sugerida por tipo de pregunta:
 - Rentabilidad mensual: get_live_profitability_by_business_month + get_sales_summary_by_business_month + get_egresos_summary_by_business_month (+ gastos fijos si aplica).
@@ -89,6 +91,8 @@ def _to_ollama_tools() -> list[dict[str, Any]]:
             },
         }
         for declaration in TOOL_DECLARATIONS
+        # Las recomendaciones se generan desde el panel (POST /ai/recommendations), no desde el chat
+        if declaration["name"] != "save_ai_recommendation"
     ]
 
 
